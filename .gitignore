@@ -1,0 +1,6 @@
+﻿################################################################################
+# Ce fichier .gitignore a été automatiquement créé par Microsoft(R) Visual Studio.
+################################################################################
+
+/src/FlightSearchEngine/FlightSearchEngine/appsettings.json
+/src/FlightSearchEngine/FlightSearchEngine/appsettings.Development.json
