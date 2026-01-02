@@ -4,3 +4,10 @@
 
 /src/FlightSearchEngine/FlightSearchEngine/appsettings.json
 /src/FlightSearchEngine/FlightSearchEngine/appsettings.Development.json
+
+**/bin/
+**/Debug/
+**/obj/
+**/.vs/
+.vscode/
+global.json

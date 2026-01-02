@@ -3,6 +3,7 @@ using System.Text;
 using FlightSearchEngine.Models;
 using Newtonsoft.Json;
 using System.Globalization;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FlightSearchEngine.Services
 {
@@ -11,38 +12,38 @@ namespace FlightSearchEngine.Services
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AmadeusFlightService> _logger;
+        private readonly IMemoryCache _cache;
 
         private readonly string _apiKey;
         private readonly string _apiSecret;
         private readonly string _baseUrl;
 
-        private string _accessToken;
-        private DateTime _tokenExpiration;
+        private const string TokenCacheKey = "AmadeusAccessToken";
 
         public AmadeusFlightService(
             HttpClient httpClient,
             IConfiguration configuration,
-            ILogger<AmadeusFlightService> logger)
+            ILogger<AmadeusFlightService> logger,
+            IMemoryCache cache)
         {
             _httpClient = httpClient;
             _configuration = configuration;
             _logger = logger;
+            _cache = cache;
 
             _apiKey = _configuration["Amadeus:ApiKey"];
             _apiSecret = _configuration["Amadeus:ApiSecret"];
             _baseUrl = _configuration["Amadeus:BaseUrl"];
-
-            _tokenExpiration = DateTime.MinValue;
         }
 
-        private async Task EnsureAuthenticatedAsync()
+        private async Task<string> GetAccessTokenAsync()
         {
-            if (!string.IsNullOrEmpty(_accessToken) && DateTime.UtcNow < _tokenExpiration)
+            if (_cache.TryGetValue(TokenCacheKey, out string cachedToken))
             {
-                return;
+                return cachedToken;
             }
 
-            _logger.LogInformation("Authentification auprès de Amadeus...");
+            _logger.LogInformation("Authentification auprès de Amadeus (Token non trouvé en cache)...");
 
             var credentials = new FormUrlEncodedContent(new[]
             {
@@ -65,10 +66,14 @@ namespace FlightSearchEngine.Services
 
             var tokenData = JsonConvert.DeserializeObject<AmadeusTokenResponse>(jsonResponse);
 
-            _accessToken = tokenData.AccessToken;
-            _tokenExpiration = DateTime.UtcNow.AddSeconds(tokenData.ExpiresIn - 60);
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(tokenData.ExpiresIn - 60));
 
-            _logger.LogInformation("Authentification Amadeus réussie");
+            _cache.Set(TokenCacheKey, tokenData.AccessToken, cacheEntryOptions);
+
+            _logger.LogInformation("Authentification Amadeus réussie et token mis en cache.");
+
+            return tokenData.AccessToken;
         }
 
         public async Task<List<Airport>> SearchAirportsAsync(string keyword)
@@ -80,12 +85,19 @@ namespace FlightSearchEngine.Services
                 return airports;
             }
 
+            string cacheKey = $"AirportSearch_{keyword.ToLower()}";
+            if (_cache.TryGetValue(cacheKey, out List<Airport> cachedAirports))
+            {
+                _logger.LogInformation("Retour des aéroports depuis le cache pour: {Keyword}", keyword);
+                return cachedAirports;
+            }
+
             try
             {
-                await EnsureAuthenticatedAsync();
+                var token = await GetAccessTokenAsync();
 
                 _httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", _accessToken);
+                    new AuthenticationHeaderValue("Bearer", token);
 
                 var url = _baseUrl + "/v1/reference-data/locations?" +
                           "subType=AIRPORT,CITY&" +
@@ -123,6 +135,9 @@ namespace FlightSearchEngine.Services
                 }
 
                 _logger.LogInformation("Trouvé {Count} aéroports", airports.Count);
+
+                // Cache the results for 1 hour since airport data rarely changes
+                _cache.Set(cacheKey, airports, TimeSpan.FromHours(1));
             }
             catch (Exception ex)
             {
@@ -142,10 +157,10 @@ namespace FlightSearchEngine.Services
 
             try
             {
-                await EnsureAuthenticatedAsync();
+                var token = await GetAccessTokenAsync();
 
                 _httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", _accessToken);
+                    new AuthenticationHeaderValue("Bearer", token);
 
                 var url = BuildFlightSearchUrl(request);
 

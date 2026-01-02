@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Lenovo\\Desktop\\FlightSearchEngine\\src\\FlightSearchEngine\\FlightSearchEngine\\FlightSearchEngine.csproj": {}
+    "/Users/kihlyouns/Desktop/FlightSearchEngine/src/FlightSearchEngine/FlightSearchEngine/FlightSearchEngine.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Lenovo\\Desktop\\FlightSearchEngine\\src\\FlightSearchEngine\\FlightSearchEngine\\FlightSearchEngine.csproj": {
+    "/Users/kihlyouns/Desktop/FlightSearchEngine/src/FlightSearchEngine/FlightSearchEngine/FlightSearchEngine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lenovo\\Desktop\\FlightSearchEngine\\src\\FlightSearchEngine\\FlightSearchEngine\\FlightSearchEngine.csproj",
+        "projectUniqueName": "/Users/kihlyouns/Desktop/FlightSearchEngine/src/FlightSearchEngine/FlightSearchEngine/FlightSearchEngine.csproj",
         "projectName": "FlightSearchEngine",
-        "projectPath": "C:\\Users\\Lenovo\\Desktop\\FlightSearchEngine\\src\\FlightSearchEngine\\FlightSearchEngine\\FlightSearchEngine.csproj",
-        "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lenovo\\Desktop\\FlightSearchEngine\\src\\FlightSearchEngine\\FlightSearchEngine\\obj\\",
+        "projectPath": "/Users/kihlyouns/Desktop/FlightSearchEngine/src/FlightSearchEngine/FlightSearchEngine/FlightSearchEngine.csproj",
+        "packagesPath": "/Users/kihlyouns/.nuget/packages/",
+        "outputPath": "/Users/kihlyouns/Desktop/FlightSearchEngine/src/FlightSearchEngine/FlightSearchEngine/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/kihlyouns/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -82,7 +76,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/Users/kihlyouns/.dotnet/sdk/10.0.101/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

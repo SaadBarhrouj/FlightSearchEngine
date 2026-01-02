@@ -1,0 +1,516 @@
+/* ===========================================
+   FlightSearch Engine - Custom Styles
+   =========================================== */
+
+/* ---------- Variables ---------- */
+:root {
+    --primary-color: #0d6efd;
+    --primary-dark: #0a58ca;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+    --dark-bg: #212529;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --transition-speed: 0.3s;
+}
+
+/* ---------- Global Styles ---------- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+    box-shadow: var(--card-shadow);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* ---------- Hero Section ---------- */
+.hero-section {
+    padding: 60px 0;
+    min-height: 400px;
+}
+
+.search-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--card-shadow-hover);
+}
+
+.search-card h2 {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.search-btn {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all var(--transition-speed);
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+}
+
+/* ---------- Autocomplete ---------- */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.autocomplete-dropdown.show {
+    display: block;
+}
+
+.autocomplete-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background var(--transition-speed);
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background: var(--light-bg);
+}
+
+.autocomplete-item .airport-code {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.autocomplete-item .airport-name {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+/* ---------- Results Section ---------- */
+.results-section {
+    padding: 40px 0;
+    flex: 1;
+}
+
+.results-header {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+}
+
+/* ---------- Filters Card ---------- */
+.filters-card {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    position: sticky;
+    top: 20px;
+}
+
+/* ---------- Flight Card ---------- */
+.flight-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all var(--transition-speed);
+    border: 2px solid transparent;
+}
+
+.flight-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+}
+
+.flight-card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 15px 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.airline-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.airline-logo {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.airline-name {
+    font-weight: 600;
+    color: var(--dark-bg);
+}
+
+.flight-number {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.flight-card-body {
+    padding: 20px;
+}
+
+.flight-times {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.time-block {
+    text-align: center;
+}
+
+.time {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-bg);
+}
+
+.airport-code {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.city-name {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.flight-path {
+    flex: 1;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.duration {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 5px;
+}
+
+.path-line {
+    position: relative;
+    height: 2px;
+    background: #dee2e6;
+    margin: 10px 0;
+}
+
+.path-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+}
+
+.path-line::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+}
+
+.path-line .plane-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 0 10px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.stops-info {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.stops-info.direct {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.flight-card-footer {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #dee2e6;
+}
+
+.price-block {
+    text-align: right;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.price-per-person {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+}
+
+.flight-details {
+    display: flex;
+    gap: 15px;
+}
+
+.detail-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    border: 1px solid #dee2e6;
+}
+
+.detail-badge i {
+    color: var(--primary-color);
+}
+
+/* ---------- Segments Section ---------- */
+.segments-section {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-top: 1px dashed #dee2e6;
+}
+
+.segment-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.segment-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.segment-item:last-child {
+    margin-bottom: 0;
+}
+
+.segment-time {
+    min-width: 80px;
+    font-weight: 600;
+}
+
+.segment-airport {
+    min-width: 60px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.segment-arrow {
+    padding: 0 15px;
+    color: var(--secondary-color);
+}
+
+.segment-duration {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+/* ---------- Return Flight Section ---------- */
+.return-flight {
+    border-top: 2px dashed var(--primary-color);
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+.return-label {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* ---------- Loading Spinner ---------- */
+#loadingSpinner .spinner-border {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---------- Footer ---------- */
+.footer {
+    background: var(--dark-bg);
+    color: white;
+    padding: 20px 0;
+    margin-top: auto;
+}
+
+/* ---------- Responsive Adjustments ---------- */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 30px 0;
+    }
+    
+    .search-card {
+        padding: 20px;
+    }
+    
+    .flight-times {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .flight-path {
+        width: 100%;
+        padding: 15px 0;
+    }
+    
+    .path-line {
+        width: 100%;
+        max-width: 200px;
+        margin: 10px auto;
+    }
+    
+    .flight-card-footer {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .flight-details {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .price-block {
+        text-align: center;
+    }
+    
+    .time {
+        font-size: 1.4rem;
+    }
+    
+    .price {
+        font-size: 1.5rem;
+    }
+    
+    .filters-card {
+        position: static;
+        margin-bottom: 20px;
+    }
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.flight-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.flight-card:nth-child(2) { animation-delay: 0.1s; }
+.flight-card:nth-child(3) { animation-delay: 0.2s; }
+.flight-card:nth-child(4) { animation-delay: 0.3s; }
+.flight-card:nth-child(5) { animation-delay: 0.4s; }
+
+/* ---------- Custom Scrollbar ---------- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
