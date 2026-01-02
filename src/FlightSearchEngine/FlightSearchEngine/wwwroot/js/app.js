@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDateInputs();
     initializeTripTypeToggle();
     initializeAutocomplete();
+    initializeTravelClasses();
     initializeSearchForm();
 });
 
@@ -292,6 +293,34 @@ async function fetchFlights() {
         loadingSpinner.style.display = 'none';
         errorMessage.style.display = 'block';
         document.getElementById('errorText').textContent = error.message;
+    }
+}
+
+// ==========================================
+// TRAVEL CLASSES
+// ==========================================
+
+async function initializeTravelClasses() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/classes`);
+        if (!response.ok) throw new Error('Failed to fetch travel classes');
+        
+        const classes = await response.json();
+        const select = document.getElementById('travelClass');
+        
+        select.innerHTML = classes.map(cls => 
+            `<option value="${cls.code}" ${cls.code === 'ECONOMY' ? 'selected' : ''}>${cls.name}</option>`
+        ).join('');
+    } catch (error) {
+        console.error('Error loading travel classes:', error);
+        // Fallback options if API fails
+        const select = document.getElementById('travelClass');
+        select.innerHTML = `
+            <option value="ECONOMY" selected>Économique</option>
+            <option value="PREMIUM_ECONOMY">Économique Premium</option>
+            <option value="BUSINESS">Affaires</option>
+            <option value="FIRST">Première</option>
+        `;
     }
 }
 
