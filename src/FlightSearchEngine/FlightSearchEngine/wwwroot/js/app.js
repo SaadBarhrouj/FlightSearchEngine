@@ -5,7 +5,6 @@
 // API Base URL
 const API_BASE_URL = '/api/flights';
 
-// State
 let currentSearchParams = null;
 let debounceTimer = null;
 
@@ -19,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAutocomplete();
     initializeTravelClasses();
     initializeSearchForm();
+    initializeSortOptions(); 
 });
 
 // ==========================================
@@ -173,7 +173,7 @@ function initializeSearchForm() {
 }
 
 async function performSearch() {
-    // Get form values
+   
     const originCode = document.getElementById('originCode').value;
     const destinationCode = document.getElementById('destinationCode').value;
     const departureDate = document.getElementById('departureDate').value;
@@ -205,7 +205,8 @@ async function performSearch() {
         adults: adults,
         children: children,
         infants: infants,
-        travelClass: travelClass
+        travelClass: travelClass,
+        sortBy: getCurrentSortBy() 
     };
     
     if (tripType === 'roundTrip' && returnDate) {
@@ -253,15 +254,17 @@ async function fetchFlights() {
     const flightResults = document.getElementById('flightResults');
     const noResults = document.getElementById('noResults');
     const errorMessage = document.getElementById('errorMessage');
+    const resultsSection = document.getElementById('resultsSection');
     
-    // Show loading
+  
     loadingSpinner.style.display = 'block';
     flightResults.innerHTML = '';
     noResults.style.display = 'none';
     errorMessage.style.display = 'none';
     
+    resultsSection.classList.add('sort-changing');
+    
     try {
-        // Build query string
         const params = new URLSearchParams(currentSearchParams);
         
         const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
@@ -273,7 +276,6 @@ async function fetchFlights() {
         
         const result = await response.json();
         
-        // Hide loading
         loadingSpinner.style.display = 'none';
         
         if (!result.success) {
@@ -293,6 +295,10 @@ async function fetchFlights() {
         loadingSpinner.style.display = 'none';
         errorMessage.style.display = 'block';
         document.getElementById('errorText').textContent = error.message;
+    } finally {
+        setTimeout(() => {
+            resultsSection.classList.remove('sort-changing');
+        }, 300);
     }
 }
 
@@ -489,13 +495,11 @@ function createReturnFlight(returnSegments) {
 }
 
 function calculateTotalDuration(segments) {
-    // Simple calculation based on first departure and last arrival
     if (segments.length === 0) return '';
     
     const first = segments[0];
     const last = segments[segments.length - 1];
     
-    // Return formatted duration from segment if available
     if (first.formattedDuration && segments.length === 1) {
         return first.formattedDuration;
     }
