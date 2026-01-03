@@ -166,6 +166,8 @@ namespace FlightSearchEngine.Controllers
                     return flights.OrderBy(f => f.DepartureTime).ToList();
                 case "departure_desc":
                     return flights.OrderByDescending(f => f.DepartureTime).ToList();
+                case "stops":
+                    return flights.OrderBy(f => f.NumberOfStops).ToList();
                 default:
                     return flights.OrderBy(f => f.TotalPrice).ToList();
             }
@@ -209,32 +211,11 @@ namespace FlightSearchEngine.Controllers
                 new { Code = "price_desc", Name = "Prix décroissant" },
                 new { Code = "duration", Name = "Durée croissante" },
                 new { Code = "duration_desc", Name = "Durée décroissante" },
-                new { Code = "departure", Name = "Heure de départ croissante" },
-                new { Code = "departure_desc", Name = "Heure de départ décroissante" }            };
+                new { Code = "departure", Name = "Heure de départ" },
+                new { Code = "stops", Name = "Nombre d'escales" }
+            };
 
             return Ok(options);
-        }
-
-        private DateTime GetDepartureTime(Flight flight)
-        {
-            if (flight.OutboundSegments == null || flight.OutboundSegments.Count == 0)
-            {
-                return DateTime.Now; 
-            }
-
-            var firstSegment = flight.OutboundSegments[0];
-            var timeString = firstSegment.FormattedDepartureTime;
-
-            var today = DateTime.Now;
-            var timeParts = timeString.Split(':');
-            if (timeParts.Length == 2 &&
-                int.TryParse(timeParts[0], out int hours) &&
-                int.TryParse(timeParts[1], out int minutes))
-            {
-                today = today.Date.AddHours(hours).AddMinutes(minutes);
-            }
-
-            return today;
         }
     }
 }
