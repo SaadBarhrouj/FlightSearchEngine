@@ -7,18 +7,20 @@ const API_BASE_URL = '/api/flights';
 
 let currentSearchParams = null;
 let debounceTimer = null;
+let allFlights = []; // Stocker tous les vols pour les filtres
 
 // ==========================================
 // INITIALIZATION
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeDateInputs();
     initializeTripTypeToggle();
     initializeAutocomplete();
     initializeTravelClasses();
     initializeSearchForm();
-    initializeSortOptions(); 
+    initializeSortOptions();
+    initializeFilters();
 });
 
 // ==========================================
@@ -29,27 +31,27 @@ function initializeDateInputs() {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const departureDateInput = document.getElementById('departureDate');
     const returnDateInput = document.getElementById('returnDate');
-    
+
     // Set minimum date to today
     departureDateInput.min = formatDate(today);
     returnDateInput.min = formatDate(tomorrow);
-    
+
     // Set default values
     departureDateInput.value = formatDate(tomorrow);
-    
+
     const nextWeek = new Date(tomorrow);
     nextWeek.setDate(nextWeek.getDate() + 7);
     returnDateInput.value = formatDate(nextWeek);
-    
+
     // Update return date minimum when departure date changes
-    departureDateInput.addEventListener('change', function() {
+    departureDateInput.addEventListener('change', function () {
         const depDate = new Date(this.value);
         depDate.setDate(depDate.getDate() + 1);
         returnDateInput.min = formatDate(depDate);
-        
+
         if (new Date(returnDateInput.value) <= new Date(this.value)) {
             returnDateInput.value = formatDate(depDate);
         }
@@ -67,9 +69,9 @@ function formatDate(date) {
 function initializeTripTypeToggle() {
     const tripTypeInputs = document.querySelectorAll('input[name="tripType"]');
     const returnDateContainer = document.getElementById('returnDateContainer');
-    
+
     tripTypeInputs.forEach(input => {
-        input.addEventListener('change', function() {
+        input.addEventListener('change', function () {
             if (this.value === 'oneWay') {
                 returnDateContainer.style.display = 'none';
                 document.getElementById('returnDate').required = false;
@@ -94,24 +96,24 @@ function setupAutocomplete(inputId, dropdownId, codeInputId) {
     const input = document.getElementById(inputId);
     const dropdown = document.getElementById(dropdownId);
     const codeInput = document.getElementById(codeInputId);
-    
-    input.addEventListener('input', function() {
+
+    input.addEventListener('input', function () {
         const keyword = this.value.trim();
-        
+
         clearTimeout(debounceTimer);
-        
+
         if (keyword.length < 2) {
             dropdown.classList.remove('show');
             return;
         }
-        
+
         debounceTimer = setTimeout(() => {
             searchAirports(keyword, dropdown, input, codeInput);
         }, 300);
     });
-    
+
     // Hide dropdown when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!input.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.remove('show');
         }
@@ -121,13 +123,13 @@ function setupAutocomplete(inputId, dropdownId, codeInputId) {
 async function searchAirports(keyword, dropdown, input, codeInput) {
     try {
         const response = await fetch(`${API_BASE_URL}/airports?keyword=${encodeURIComponent(keyword)}`);
-        
+
         if (!response.ok) {
             throw new Error('Erreur lors de la recherche');
         }
-        
+
         const airports = await response.json();
-        
+
         if (airports.length === 0) {
             dropdown.innerHTML = '<div class="autocomplete-item text-muted">Aucun aéroport trouvé</div>';
         } else {
@@ -137,10 +139,10 @@ async function searchAirports(keyword, dropdown, input, codeInput) {
                     <span class="airport-name ms-2">${airport.cityName} - ${airport.name}</span>
                 </div>
             `).join('');
-            
+
             // Add click handlers
             dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function () {
                     const code = this.dataset.code;
                     const name = this.dataset.name;
                     input.value = name;
@@ -149,9 +151,9 @@ async function searchAirports(keyword, dropdown, input, codeInput) {
                 });
             });
         }
-        
+
         dropdown.classList.add('show');
-        
+
     } catch (error) {
         console.error('Erreur autocomplete:', error);
         dropdown.innerHTML = '<div class="autocomplete-item text-danger">Erreur de chargement</div>';
@@ -165,15 +167,15 @@ async function searchAirports(keyword, dropdown, input, codeInput) {
 
 function initializeSearchForm() {
     const form = document.getElementById('searchForm');
-    
-    form.addEventListener('submit', async function(e) {
+
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
         await performSearch();
     });
 }
 
 async function performSearch() {
-   
+
     const originCode = document.getElementById('originCode').value;
     const destinationCode = document.getElementById('destinationCode').value;
     const departureDate = document.getElementById('departureDate').value;
@@ -183,20 +185,20 @@ async function performSearch() {
     const infants = document.getElementById('infants').value;
     const travelClass = document.getElementById('travelClass').value;
     const tripType = document.querySelector('input[name="tripType"]:checked').value;
-    
+
     // Validation
     if (!originCode) {
         alert('Veuillez sélectionner une ville de départ');
         document.getElementById('origin').focus();
         return;
     }
-    
+
     if (!destinationCode) {
         alert('Veuillez sélectionner une ville d\'arrivée');
         document.getElementById('destination').focus();
         return;
     }
-    
+
     // Build search params
     currentSearchParams = {
         origin: originCode,
@@ -206,19 +208,19 @@ async function performSearch() {
         children: children,
         infants: infants,
         travelClass: travelClass,
-        sortBy: getCurrentSortBy() 
+        sortBy: getCurrentSortBy()
     };
-    
+
     if (tripType === 'roundTrip' && returnDate) {
         currentSearchParams.returnDate = returnDate;
     }
-    
+
     // Show results section
     document.getElementById('resultsSection').style.display = 'block';
-    
+
     // Update search summary
     updateSearchSummary();
-    
+
     // Perform search
     await fetchFlights();
 }
@@ -226,26 +228,26 @@ async function performSearch() {
 function updateSearchSummary() {
     const origin = document.getElementById('origin').value;
     const destination = document.getElementById('destination').value;
-    const departureDate = new Date(currentSearchParams.departureDate).toLocaleDateString('fr-FR', { 
-        weekday: 'long', 
-        day: 'numeric', 
-        month: 'long' 
+    const departureDate = new Date(currentSearchParams.departureDate).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
     });
-    
+
     let summary = `${origin} → ${destination} • ${departureDate}`;
-    
+
     if (currentSearchParams.returnDate) {
-        const returnDate = new Date(currentSearchParams.returnDate).toLocaleDateString('fr-FR', { 
-            weekday: 'long', 
-            day: 'numeric', 
-            month: 'long' 
+        const returnDate = new Date(currentSearchParams.returnDate).toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long'
         });
         summary += ` • Retour: ${returnDate}`;
     }
-    
+
     const totalPassengers = parseInt(currentSearchParams.adults) + parseInt(currentSearchParams.children) + parseInt(currentSearchParams.infants);
     summary += ` • ${totalPassengers} passager${totalPassengers > 1 ? 's' : ''}`;
-    
+
     document.getElementById('searchSummary').textContent = summary;
 }
 
@@ -255,41 +257,50 @@ async function fetchFlights() {
     const noResults = document.getElementById('noResults');
     const errorMessage = document.getElementById('errorMessage');
     const resultsSection = document.getElementById('resultsSection');
-    
-  
+
+
     loadingSpinner.style.display = 'block';
     flightResults.innerHTML = '';
     noResults.style.display = 'none';
     errorMessage.style.display = 'none';
-    
+
     resultsSection.classList.add('sort-changing');
-    
+
     try {
         const params = new URLSearchParams(currentSearchParams);
-        
+
         const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
-        
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Erreur lors de la recherche');
         }
-        
+
         const result = await response.json();
-        
+
         loadingSpinner.style.display = 'none';
-        
+
         if (!result.success) {
             throw new Error(result.errorMessage || 'Erreur lors de la recherche');
         }
-        
+
         if (result.flights.length === 0) {
             noResults.style.display = 'block';
             document.getElementById('resultsCount').textContent = '0';
         } else {
+            allFlights = result.flights; // Stocker tous les vols
             document.getElementById('resultsCount').textContent = result.flights.length;
             renderFlights(result.flights);
+
+            // Extraire et afficher les compagnies disponibles
+            extractAirlines(result.flights);
+
+            // Extraire et afficher les escales disponibles
+            extractAvailableStops(result.flights);
+
+            // Mettre à jour la plage de prix
+            updatePriceRange(result.flights);
         }
-        
     } catch (error) {
         console.error('Erreur recherche:', error);
         loadingSpinner.style.display = 'none';
@@ -310,11 +321,9 @@ async function initializeTravelClasses() {
     try {
         const response = await fetch(`${API_BASE_URL}/classes`);
         if (!response.ok) throw new Error('Failed to fetch travel classes');
-        
         const classes = await response.json();
         const select = document.getElementById('travelClass');
-        
-        select.innerHTML = classes.map(cls => 
+        select.innerHTML = classes.map(cls =>
             `<option value="${cls.code}" ${cls.code === 'ECONOMY' ? 'selected' : ''}>${cls.name}</option>`
         ).join('');
     } catch (error) {
@@ -342,10 +351,8 @@ function renderFlights(flights) {
 function createFlightCard(flight) {
     const outbound = flight.outboundSegments;
     const returnSegments = flight.returnSegments;
-    
     const firstSegment = outbound[0];
     const lastSegment = outbound[outbound.length - 1];
-    
     return `
         <div class="flight-card">
             <!-- Header -->
@@ -457,7 +464,6 @@ function createReturnFlight(returnSegments) {
     const lastSegment = returnSegments[returnSegments.length - 1];
     const totalDuration = calculateTotalDuration(returnSegments);
     const stops = returnSegments.length - 1;
-    
     return `
         <div class="return-flight">
             <div class="flight-card-body">
@@ -496,14 +502,11 @@ function createReturnFlight(returnSegments) {
 
 function calculateTotalDuration(segments) {
     if (segments.length === 0) return '';
-    
     const first = segments[0];
     const last = segments[segments.length - 1];
-    
     if (first.formattedDuration && segments.length === 1) {
         return first.formattedDuration;
     }
-    
     return segments.map(s => s.formattedDuration).join(' + ');
 }
 
