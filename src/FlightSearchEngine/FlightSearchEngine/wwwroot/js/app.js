@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeTripTypeToggle();
     initializeAutocomplete();
     initializeTravelClasses();
+    initializePassengerValidation();
     initializeSearchForm();
     initializeSortOptions();
     initializeFilters();
@@ -81,6 +82,58 @@ function initializeTripTypeToggle() {
             }
         });
     });
+}
+
+// ==========================================
+// PASSENGER VALIDATION
+// ==========================================
+
+function initializePassengerValidation() {
+    const adultsSelect = document.getElementById('adults');
+    const childrenSelect = document.getElementById('children');
+    const infantsSelect = document.getElementById('infants');
+    const warningDiv = document.getElementById('passengerWarning');
+    const warningText = document.getElementById('passengerWarningText');
+    const searchBtn = document.querySelector('.search-btn');
+
+    const MAX_PASSENGERS = 9; // Amadeus API limit (adults + children)
+    
+    function validatePassengers() {
+        const adults = parseInt(adultsSelect.value);
+        const children = parseInt(childrenSelect.value);
+        const infants = parseInt(infantsSelect.value);
+        
+        const totalPassengers = adults + children;
+        
+        // Rule 1: Maximum 9 passengers (adults + children, infants not counted)
+        if (totalPassengers > MAX_PASSENGERS) {
+            warningDiv.style.display = 'block';
+            warningText.textContent = `Maximum ${MAX_PASSENGERS} passagers (adultes + enfants). Actuellement: ${totalPassengers}`;
+            searchBtn.disabled = true;
+            return false;
+        }
+        
+        // Rule 2: Number of infants cannot exceed number of adults
+        if (infants > adults) {
+            warningDiv.style.display = 'block';
+            warningText.textContent = `Le nombre de bébés (${infants}) ne peut pas dépasser le nombre d'adultes (${adults})`;
+            searchBtn.disabled = true;
+            return false;
+        }
+        
+        // All validations passed
+        warningDiv.style.display = 'none';
+        searchBtn.disabled = false;
+        return true;
+    }
+    
+    // Add event listeners to all passenger selects
+    adultsSelect.addEventListener('change', validatePassengers);
+    childrenSelect.addEventListener('change', validatePassengers);
+    infantsSelect.addEventListener('change', validatePassengers);
+    
+    // Initial validation
+    validatePassengers();
 }
 
 // ==========================================
@@ -402,7 +455,6 @@ function createFlightCard(flight) {
                 </div>
                 <div class="price-block">
                     <div class="price">${flight.formattedPrice}</div>
-                    <div class="price-per-person">par personne</div>
                 </div>
             </div>
         </div>
@@ -480,7 +532,7 @@ function createReturnFlight(returnSegments) {
                     <div class="flight-path">
                         <div class="duration">${totalDuration}</div>
                         <div class="path-line">
-                            <i class="bi bi-airplane plane-icon" style="transform: rotate(180deg);"></i>
+                            <i class="bi bi-airplane plane-icon" style="transform: translate(-50%, -50%) rotate(-90deg);"></i>
                         </div>
                         <div class="stops-info ${stops === 0 ? 'direct' : ''}">
                             ${stops === 0 ? 'Direct' : stops + ' escale' + (stops > 1 ? 's' : '')}
