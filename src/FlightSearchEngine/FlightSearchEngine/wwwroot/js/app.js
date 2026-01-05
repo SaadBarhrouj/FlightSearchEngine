@@ -9,6 +9,11 @@ let currentSearchParams = null;
 let debounceTimer = null;
 let allFlights = []; // Stocker tous les vols pour les filtres
 
+// Pagination
+let currentPage = 1;
+let itemsPerPage = 10;
+let totalPages = 1;
+
 // ==========================================
 // INITIALIZATION
 // ==========================================
@@ -393,25 +398,248 @@ async function initializeTravelClasses() {
 }
 
 // ==========================================
-// RENDER FLIGHTS
+// RENDER FLIGHTS WITH PAGINATION
 // ==========================================
 
 function renderFlights(flights) {
-    const container = document.getElementById('flightResults');
-    container.innerHTML = flights.map(flight => createFlightCard(flight)).join('');
+    allFlights = flights;
+    currentPage = 1;
+    
+    // Initialize filters with all flights
+    if (typeof extractAirlines === 'function') {
+        extractAirlines(flights);
+    }
+    if (typeof extractAvailableStops === 'function') {
+        extractAvailableStops(flights);
+    }
+    if (typeof updatePriceRange === 'function') {
+        updatePriceRange(flights);
+    }
+    
+    renderCurrentPage();
 }
 
-function createFlightCard(flight) {
+function renderCurrentPage() {
+    const container = document.getElementById('flightResults');
+    
+    // Get filtered flights
+    let flightsToDisplay = getFilteredFlights();
+    
+    totalPages = Math.ceil(flightsToDisplay.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageFlights = flightsToDisplay.slice(startIndex, endIndex);
+    
+    container.innerHTML = pageFlights.map((flight, index) => 
+        createFlightCard(flight, startIndex + index)
+    ).join('');
+    
+    // Update results count
+    if (typeof updateResultsCount === 'function') {
+        updateResultsCount(flightsToDisplay.length);
+    }
+    
+    renderPagination(flightsToDisplay.length);
+    scrollToResults();
+}
+
+function getFilteredFlights() {
+    // If no active filters, return all flights
+    if (typeof activeFilters === 'undefined') {
+        return allFlights;
+    }
+    
+    return allFlights.filter(flight => {
+        // Check airline filter
+        if (activeFilters.airlines.length > 0) {
+            if (!activeFilters.airlines.includes(flight.mainCarrierCode)) {
+                return false;
+            }
+        }
+        
+        // Check flight type filter
+        if (activeFilters.flightType === 'direct' && !flight.isDirect) {
+            return false;
+        } else if (activeFilters.flightType === 'stopover' && flight.isDirect) {
+            return false;
+        }
+        
+        // Check max stops filter
+        if (activeFilters.maxStops !== null && flight.numberOfStops !== activeFilters.maxStops) {
+            return false;
+        }
+        
+        // Check departure time periods
+        if (activeFilters.departurePeriods.length > 0) {
+            const depTime = flight.outboundSegments[0].formattedDepartureTime;
+            const matchesPeriod = activeFilters.departurePeriods.some(period => 
+                isTimeInPeriod(depTime, period)
+            );
+            if (!matchesPeriod) {
+                return false;
+            }
+        }
+        
+        // Check arrival time periods
+        if (activeFilters.arrivalPeriods.length > 0) {
+            const lastSegment = flight.outboundSegments[flight.outboundSegments.length - 1];
+            const arrTime = lastSegment.formattedArrivalTime;
+            const matchesPeriod = activeFilters.arrivalPeriods.some(period => 
+                isTimeInPeriod(arrTime, period)
+            );
+            if (!matchesPeriod) {
+                return false;
+            }
+        }
+        
+        // Check price range
+        if (activeFilters.priceMin !== null && flight.price < activeFilters.priceMin) {
+            return false;
+        }
+        if (activeFilters.priceMax !== null && flight.price > activeFilters.priceMax) {
+            return false;
+        }
+        
+        return true;
+    });
+}
+
+function scrollToResults() {
+    const resultsSection = document.getElementById('resultsSection');
+    if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function renderPagination(totalFlights) {
+    let paginationContainer = document.getElementById('paginationContainer');
+    
+    if (!paginationContainer) {
+        // Create pagination container if it doesn't exist
+        const resultsContainer = document.querySelector('.col-lg-8');
+        if (!resultsContainer) return;
+        paginationContainer = document.createElement('div');
+        paginationContainer.id = 'paginationContainer';
+        paginationContainer.className = 'pagination-container mt-4';
+        resultsContainer.appendChild(paginationContainer);
+    }
+    
+    totalPages = Math.ceil(totalFlights / itemsPerPage);
+    
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '<nav aria-label="Flight results pagination"><ul class="pagination justify-content-center">';
+    
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">
+                <i class="bi bi-chevron-left"></i> Précédent
+            </a>
+        </li>
+    `;
+    
+    // Page numbers
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage < maxPagesToShow - 1) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    if (startPage > 1) {
+        paginationHTML += `
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="changePage(1); return false;">1</a>
+            </li>
+        `;
+        if (startPage > 2) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+            </li>
+        `;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+        paginationHTML += `
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="changePage(${totalPages}); return false;">${totalPages}</a>
+            </li>
+        `;
+    }
+    
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">
+                Suivant <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+    `;
+    
+    paginationHTML += '</ul></nav>';
+    
+    // Add results info
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalFlights);
+    
+    paginationHTML += `
+        <div class="pagination-info text-center mt-2">
+            <small class="text-muted">
+                Affichage de ${startItem} à ${endItem} sur ${totalFlights} vols
+            </small>
+        </div>
+    `;
+    
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+function changePage(page) {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    currentPage = page;
+    renderCurrentPage();
+}
+
+function createFlightCard(flight, index) {
     const outbound = flight.outboundSegments;
     const returnSegments = flight.returnSegments;
     const firstSegment = outbound[0];
     const lastSegment = outbound[outbound.length - 1];
+    
+    // Data attributes for filtering
+    const dataAttrs = `
+        data-index="${index}"
+        data-price="${flight.price}" 
+        data-airline="${flight.mainCarrierCode}" 
+        data-stops="${flight.numberOfStops}"
+        data-type="${flight.isDirect ? 'direct' : 'stopover'}"
+        data-dep-time="${firstSegment.formattedDepartureTime}"
+        data-arr-time="${lastSegment.formattedArrivalTime}"
+    `.trim();
+    
     return `
-        <div class="flight-card">
+        <div class="flight-card" ${dataAttrs}>
             <!-- Header -->
             <div class="flight-card-header">
                 <div class="airline-info">
-                    <div class="airline-logo">${flight.mainCarrierCode}</div>
+                    <img src="https://images.kiwi.com/airlines/64/${flight.mainCarrierCode}.png" 
+                         alt="${flight.mainCarrierCode}" 
+                         class="airline-logo-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="airline-logo" style="display:none;">${flight.mainCarrierCode}</div>
                     <div>
                         <div class="airline-name">${flight.mainCarrierName || flight.mainCarrierCode}</div>
                         <div class="flight-number">${firstSegment.carrierCode} ${firstSegment.flightNumber}</div>

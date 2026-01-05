@@ -169,6 +169,16 @@ body {
     gap: 10px;
 }
 
+.airline-logo-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: contain;
+    background: white;
+    padding: 5px;
+    border: 1px solid #e9ecef;
+}
+
 .airline-logo {
     width: 40px;
     height: 40px;
@@ -475,6 +485,16 @@ body {
         position: static;
         margin-bottom: 20px;
     }
+    
+    /* Pagination mobile */
+    .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .pagination-info {
+        font-size: 0.85rem;
+    }
 }
 
 /* ---------- Animations ---------- */
@@ -515,4 +535,49 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* ---------- Pagination ---------- */
+.pagination-container {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.pagination {
+    gap: 5px;
+}
+
+.pagination .page-link {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 8px 15px;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.4);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    color: var(--secondary-color);
+    font-weight: 500;
 }

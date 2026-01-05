@@ -252,22 +252,18 @@ function renderStopsFilter() {
 
 
 function applyAllFilters() {
-    const allFlightCards = document.querySelectorAll('.flight-card');
-    let visibleCount = 0;
-
-    allFlightCards.forEach(card => {
-        const shouldShow = checkFlightAgainstFilters(card);
-
-        if (shouldShow) {
-            card.style.display = 'block';
-            visibleCount++;
-        } else {
-            card.style.display = 'none';
-        }
-    });
-
-    updateResultsCount(visibleCount);
+    // Reset to page 1 when filters change
+    if (typeof currentPage !== 'undefined') {
+        currentPage = 1;
+    }
+    
+    // Update active filters display
     updateActiveFiltersDisplay();
+    
+    // Re-render with filters applied
+    if (typeof renderCurrentPage === 'function') {
+        renderCurrentPage();
+    }
 }
 
 function checkFlightAgainstFilters(flightCard) {
@@ -324,28 +320,13 @@ function checkFlightAgainstFilters(flightCard) {
 }
 
 function extractFlightData(flightCard) {
-    const airlineLogo = flightCard.querySelector('.airline-logo');
-    const airlineCode = airlineLogo ? airlineLogo.textContent.trim() : '';
-
-    const timeBlocks = flightCard.querySelectorAll('.flight-times .time-block .time');
-    const departureTime = timeBlocks[0] ? timeBlocks[0].textContent.trim() : '00:00';
-    const arrivalTime = timeBlocks[1] ? timeBlocks[1].textContent.trim() : '00:00';
-
-    const priceElement = flightCard.querySelector('.price');
-    const priceText = priceElement ? priceElement.textContent.trim() : '0';
-    const price = parseFloat(priceText.replace(/[^\d,]/g, '').replace(',', '.'));
-
-    const stopsElement = flightCard.querySelector('.stops-info');
-    const stopsText = stopsElement ? stopsElement.textContent.trim().toLowerCase() : '';
-    const isDirect = stopsText.includes('direct');
-
-    let numberOfStops = 0;
-    if (!isDirect) {
-        const match = stopsText.match(/(\d+)\s*escale/);
-        if (match) {
-            numberOfStops = parseInt(match[1]);
-        }
-    }
+    // Read directly from data attributes (much more reliable)
+    const price = parseFloat(flightCard.dataset.price) || 0;
+    const airlineCode = flightCard.dataset.airline || '';
+    const numberOfStops = parseInt(flightCard.dataset.stops) || 0;
+    const isDirect = flightCard.dataset.type === 'direct';
+    const departureTime = flightCard.dataset.depTime || '00:00';
+    const arrivalTime = flightCard.dataset.arrTime || '00:00';
 
     return {
         airlineCode,
