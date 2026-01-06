@@ -187,6 +187,25 @@
             color: #0d6efd;
         }
 
+/* Airline logo in filters */
+.airline-filter-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: white;
+    padding: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.airline-name-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .airline-code-badge {
     display: inline-block;
     background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
@@ -665,7 +684,7 @@
     }
 
 /* ==========================================
-   COMPTEUR DE RÉSULTATS FILTRÉS
+   COMPTEUR DE Rï¿½SULTATS FILTRï¿½S
    ========================================== */
 
 .results-count {
@@ -791,7 +810,7 @@
 
 
 /* ==========================================
-   LISTES À COCHER POUR LES HEURES
+   LISTES ï¿½ COCHER POUR LES HEURES
    ========================================== */
 
 .time-checkbox-list {

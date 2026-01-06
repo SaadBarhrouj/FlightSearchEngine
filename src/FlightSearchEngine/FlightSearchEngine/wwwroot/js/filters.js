@@ -202,8 +202,11 @@ function renderAirlineFilters() {
                    value="${airline.code}" 
                    id="airline_${airline.code}">
             <label class="form-check-label" for="airline_${airline.code}">
-                <span class="airline-code-badge">${airline.code}</span>
-                <span>${airline.name}</span>
+                <img src="https://images.kiwi.com/airlines/64/${airline.code}.png" 
+                     alt="${airline.name}" 
+                     class="airline-filter-logo"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                <span class="airline-name-text">${airline.name}</span>
             </label>
         </div>
     `).join('');
